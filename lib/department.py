@@ -1,6 +1,8 @@
 # lib/department.py
 
 from __init__ import CURSOR, CONN
+# CIRCULAR IMPORTS! Do not do this, or you'll be stuck in an infinite loop:
+# from employee import Employee 
 
 
 class Department:
@@ -139,3 +141,16 @@ class Department:
 
         row = CURSOR.execute(sql, (name,)).fetchone()
         return cls.instance_from_db(row) if row else None
+    
+    def employees(self):
+        """Return a list of employees associated with current department"""
+        from employee import Employee
+        sql = """
+            SELECT * FROM employees
+            WHERE department_id = ?
+        """
+        CURSOR.execute(sql, (self.id,))
+        
+        rows = CURSOR.fetchall()
+        return list(Employee.instance_from_db(row) for row in rows)
+        
